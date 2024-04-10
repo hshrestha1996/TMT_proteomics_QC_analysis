@@ -1,0 +1,10 @@
+Run the example file with this code
+
+python3 BatchQ_QC_filter_impute_normalize.py combined_raw_uni_prot_R.xlsx 15 0.75 sig126
+
+
+Arguments are:
+	excel_batchQname = "combined_raw_uni_prot_R.xlsx"
+	first_row = 15
+	NaN_threshold = 0.75
+	IR_channel = "sig126"
