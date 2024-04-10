@@ -1,0 +1,6 @@
+16993 total proteins are identified in batchQ.
+TMT: 16 was used.
+6 unique batches are present.
+You select to keep data with 25.0 %. NaN values. The NaN values will be imputed using KNN method.
+13863 proteins will be in the final matrix.
+ Protein matrix will now be corrected with IR + median factor and then they will be mean centered.
