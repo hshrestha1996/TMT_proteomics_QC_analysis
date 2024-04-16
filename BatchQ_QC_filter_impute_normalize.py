@@ -16,6 +16,8 @@ from itertools import cycle
 from scipy.stats import norm
 from sklearn.preprocessing import StandardScaler
 from matplotlib.colors import to_rgba
+from missforest.miss_forest import MissForest
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
 def z_scores_for_proteins(data):
     # Calculate the mean and standard deviation for each protein (row)
@@ -25,17 +27,17 @@ def z_scores_for_proteins(data):
 
 def plot_batch_boxplot(proteins_log,title="Boxplot Before Any Correction", ylabel="Log2 Abundance", xlabel= "Samples across batches"):
     # Extract batch information from column names
-    batches = proteins_log.columns.str.split("_").str.get(0)
+    batches = proteins_log.columns.str.split("_").str.get(0).str.split("batch").str.get(1)
     unique_batches = batches.unique()
     n = int(len(batches) / len(unique_batches))
 
     # Create a list to store color names for each batch
-    colors = cycle(plt.cm.tab10.colors)
-    batch_color_names = [plt.cm.tab10(i) for i in range(len(unique_batches))]
+    colors = cycle(plt.cm.tab20.colors)
+    batch_color_names = [plt.cm.tab20(i) for i in range(len(unique_batches))]
     batch_color_names = [value for value in batch_color_names for _ in range(n)]
 
     # Before any correction
-    fig, axs = plt.subplots(1, 1, figsize=(10, 5))
+    fig, axs = plt.subplots(1, 1, figsize=(len(uniq_batches)*0.75, 5))
     proteomics_data = proteins_log  # 100 samples and 5 proteins
     ax = axs
 
@@ -84,22 +86,12 @@ excel_batchQname = sys.argv[1]
 first_row = int(sys.argv[2])
 NaN_threshold = float(sys.argv[3])
 IR_channel = sys.argv[4]
-
-# Load libraries and functions
-import pandas as pd
-import seaborn as sns
-import numpy as np
-from sklearn.impute import KNNImputer
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from matplotlib.patches import Ellipse
-from itertools import cycle
-from scipy.stats import norm
-from sklearn.preprocessing import StandardScaler
-from matplotlib.colors import to_rgba
+peptide_file = sys.argv[5]
+add_peptide=sys.argv[6]
+impute_method = sys.argv[7]
 
 # Load Excel data
-df = pd.read_excel(excel_batchQname, skiprows=first_row)
+df = pd.read_excel(excel_batchQname, skiprows= (first_row-1))
 df = df.set_index("ProteinAccession")
 
 # Print basic info
@@ -117,7 +109,7 @@ total_peptides_summary = total_peptides_columns.describe()
 data['batchMissed'] = total_peptides_columns.apply(lambda x: (x == 0).sum(), axis=1)
 
 # Visualization
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(len(uniq_batches)*0.75, 5))
 tmp = data['batchMissed'].value_counts(normalize=True) * 100
 tmp = tmp.sort_index()
 bp = tmp.plot(kind='bar', ylim=(0, 100), ylabel="% proteins (total n = {})".format(len(data)),
